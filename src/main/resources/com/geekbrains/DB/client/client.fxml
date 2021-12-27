@@ -3,15 +3,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<HBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.geekbrains.DB.client.ClientController">
-    <children>
-        <VBox prefHeight="520" prefWidth="419.0">
-            <ListView fx:id="listView" prefHeight="480" prefWidth="254.0" />
-            <TextField fx:id="textField" editable="false" layoutY="470.0" onAction="#sendMessage" prefHeight="40" prefWidth="423.0" />
-        </VBox>
-        <VBox prefHeight="520.0" prefWidth="234.0">
-            <ListView fx:id="listViewServerFiles" prefHeight="480" prefWidth="254.0" />
-         <TextField fx:id="textFieldServerFiles" editable="false" layoutY="470.0" onAction="#sendFile" prefHeight="40" prefWidth="423.0" />
-        </VBox>
-    </children>
-</HBox>
+<VBox prefHeight="513.0" prefWidth="298.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.geekbrains.DB.client.ClientController">
+    <ListView fx:id="listView" prefHeight="472.0" prefWidth="298.0" />
+    <TextField fx:id="textField" layoutY="470.0" editable="false" onAction="#sendMessage" prefHeight="48.0" prefWidth="298.0" />
+</VBox>

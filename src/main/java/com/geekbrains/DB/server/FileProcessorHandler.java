@@ -1,6 +1,10 @@
 package com.geekbrains.DB.server;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Path;
 
@@ -11,23 +15,16 @@ public class FileProcessorHandler implements Runnable {
     private DataInputStream is;
     private DataOutputStream os;
     private byte[] buf;
-    private String[] listFiles;
 
     public FileProcessorHandler(Socket socket) throws IOException {
         is = new DataInputStream(socket.getInputStream());
         os = new DataOutputStream(socket.getOutputStream());
         buf = new byte[SIZE];
         currentDir = new File("serverDir");
-        listFiles = currentDir.list();
     }
 
     @Override
     public void run() {
-        try {
-            sendListFiles();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         try {
             while (true) {
                 String command = is.readUTF();
@@ -44,28 +41,7 @@ public class FileProcessorHandler implements Runnable {
                             fos.write(buf, 0, read);
                         }
                     }
-                    os.writeUTF(fileName);
                     os.writeUTF("File successfully uploaded");
-                    os.flush();
-                }
-                if (command.equals("#DOWNLOAD#FILE")) {
-                    String fileName = is.readUTF();
-                    Path currentPath = currentDir.toPath().resolve(fileName);
-                    long size = currentPath.toFile().length();
-                    System.out.println("Downloaded file: " + fileName);
-                    System.out.println("File size: " + size);
-                    try (FileInputStream is = new FileInputStream(currentPath.toFile())) {
-                        while (true) {
-                            int read = is.read(buf);
-                            if (read == -1) {
-                                break;
-                            }
-                            os.writeUTF("#SEND#FILE#");
-                            os.writeUTF(fileName);
-                            os.writeLong(size);
-                            os.write(buf, 0, read);
-                        }
-                    }
                     os.flush();
                 }
             }
@@ -73,15 +49,5 @@ public class FileProcessorHandler implements Runnable {
             e.printStackTrace();
         }
 
-    }
-
-    private void sendListFiles() throws IOException {
-        if (listFiles.length != 0) {
-            for (String file : listFiles) {
-                os.writeUTF(file);
-            }
-        } else {
-            os.writeUTF("Server directory is empty");
-        }
     }
 }
