@@ -85,8 +85,8 @@ public class NioEchoServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (s.toString().startsWith("..")) {
-//          TODO go to upper dir
+        } else if (s.toString().trim().equals("..")) {
+            currentDirPath = Paths.get(String.valueOf(currentDirPath.getParent()));
         } else if (s.toString().startsWith("cat")) {
             String[] token = s.toString().split("\\s", 2);
             String fileName = token[1].trim();
