@@ -39,6 +39,10 @@ public class FileProcessorHandler implements Runnable {
                     File file = currentDir.toPath().resolve(fileName).toFile();
                     SenderUtils.loadFileToOutputStream(os, file);
                 }
+                if (command.equals("#END#")) {
+                    System.out.println("Client disconnected");
+                    break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

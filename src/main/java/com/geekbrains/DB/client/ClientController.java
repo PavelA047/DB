@@ -3,10 +3,12 @@ package com.geekbrains.DB.client;
 import com.geekbrains.DB.utils.SenderUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.*;
 import java.net.Socket;
@@ -18,7 +20,6 @@ import java.util.ResourceBundle;
 public class ClientController implements Initializable {
 
     public ListView<String> clientView;
-    public TextField textField;
     public ListView<String> serverView;
     public Label clientLabel;
     public Label serverLabel;
@@ -26,6 +27,7 @@ public class ClientController implements Initializable {
     private DataOutputStream os;
     private File currentDir;
     private byte[] buf;
+    private Stage stage;
 
 
     private void read() {
@@ -39,6 +41,7 @@ public class ClientController implements Initializable {
                         String fileName = is.readUTF();
                         Platform.runLater(() -> serverView.getItems().add(fileName));
                     }
+                    Platform.runLater(() -> serverView.getItems().sorted());
                 }
                 if (command.equals("#SEND#FILE#")) {
                     SenderUtils.getFileFromInputStream(is, currentDir);
@@ -54,6 +57,7 @@ public class ClientController implements Initializable {
         clientView.getItems().clear();
         clientView.getItems().add("..");
         clientView.getItems().addAll(currentDir.list());
+        clientView.getItems().sorted();
         clientLabel.setText(getClientFilesDetails());
     }
 
@@ -100,6 +104,20 @@ public class ClientController implements Initializable {
             Thread readThread = new Thread(this::read);
             readThread.setDaemon(true);
             readThread.start();
+            Platform.runLater(() -> {
+                stage = (Stage) clientLabel.getScene().getWindow();
+                stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                    @Override
+                    public void handle(WindowEvent event) {
+                        try {
+                            os.writeUTF("#END#");
+                            System.out.println("Bye");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -116,5 +134,15 @@ public class ClientController implements Initializable {
         os.writeUTF("#GET#FILE#");
         os.writeUTF(fileName);
         os.flush();
+    }
+
+    public void close(ActionEvent actionEvent) {
+        try {
+            os.writeUTF("#END#");
+            System.out.println("Bye");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        stage.close();
     }
 }
